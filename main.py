@@ -1,24 +1,27 @@
 import my_langchain_helper as helper 
 import streamlit as st 
+import textwrap
 
-st.title("Company Name Generator!")
+st.title("YouTube Assistant!")
 
-company_type = st.sidebar.selectbox("What is your company type?", 
-                                    ("AI", "Finance", "BioTech"))
+with st.sidebar:
+    with st.form(key = "my_form"):
+        youtube_url = st.sidebar.text_area(
+            label="Paste the YoutTube URL",
+            max_chars=80
+        )
+        query = st.sidebar.text_area(
+            label="What is your question?",
+            max_chars=100,
+            key="query"
+        )
 
-response_number = st.sidebar.text_area(label="How many names to generate?",
-                                       max_chars=1)
-
-max_char = st.sidebar.text_area(label="How many maximum charater per name?",
-                                       max_chars=1)
-
-# gen_button = st.sidebar.button(label="Generate", 
-#                                 on_click=generate)
+        submit_button = st.form_submit_button(label="Enter")
 
 
-if max_char:
-    response = helper.generate_company_name(company_type=company_type,
-                                 response_number=response_number,
-                                 max_char=max_char)
-    st.text(response['company_name'])
-    
+if query and youtube_url:
+    db = helper.create_vector_db_from_youtube_link(youtube_url)
+    response, docs = helper.get_response_from_query(db, query)
+    st.subheader("Answer: ")
+    st.text(textwrap.fill(response, width=80))
+
